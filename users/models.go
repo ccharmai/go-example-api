@@ -1,8 +1,8 @@
 package users
 
 import (
-	"api/common"
-	"api/helpers"
+	"go-example-api/common"
+	"go-example-api/helpers"
 )
 
 // Database and response model

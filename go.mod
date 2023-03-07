@@ -1,4 +1,4 @@
-module api
+module go-example-api
 
 go 1.20
 

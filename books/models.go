@@ -1,6 +1,6 @@
 package books
 
-import "api/common"
+import "go-example-api/common"
 
 // Database and response model
 type BookModel struct {

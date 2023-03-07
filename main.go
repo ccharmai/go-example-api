@@ -1,9 +1,9 @@
 package main
 
 import (
-	"api/books"
-	"api/common"
-	"api/users"
+	"go-example-api/books"
+	"go-example-api/common"
+	"go-example-api/users"
 
 	"github.com/gin-gonic/gin"
 )
