@@ -18,14 +18,16 @@ func getAllBooksController(c *gin.Context) {
 }
 
 func postNewBookController(c *gin.Context) {
-	var book BookModel
+	var bookRequest CreateBookModel
 
-	if err := c.ShouldBindJSON(&book); err != nil {
+	if err := c.ShouldBindJSON(&bookRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := BookCreate(&book); err != nil {
+	var book = bookRequest.getBookModel()
+
+	if err := BookCreate(book); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
