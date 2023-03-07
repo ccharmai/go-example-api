@@ -19,11 +19,13 @@ func applyMigrations() {
 }
 
 func main() {
+	common.LoadConfig()
 	common.InitDatabase()
+
 	applyMigrations()
 
 	r := gin.Default()
 	addRoutes(r)
 
-	r.Run(":8080")
+	r.Run(":" + string(common.Config.Port))
 }
