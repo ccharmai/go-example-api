@@ -2,35 +2,33 @@ package books
 
 import "go-example-api/common"
 
-// Database and response model
+// Define models
 type BookModel struct {
 	ID      uint   `json:"id" gorm:"primary_key"`
 	Title   string `json:"title" binding:"required"`
 	Content string `json:"content" binding:"required"`
 }
 
-// Request model with validation
-type CreateBookModel struct {
+type PostBookModel struct {
 	Title   string `json:"title" binding:"required"`
 	Content string `json:"content" binding:"required"`
 }
 
-// Request converter to database model
-func (parent *CreateBookModel) getBookModel() *BookModel {
+// Define converters
+func (parent *PostBookModel) getBookModel() *BookModel {
 	return &BookModel{Title: parent.Title, Content: parent.Content}
 }
 
-// Get all books from database
-func GetAllBooks(b *[]BookModel) error {
-	return common.DB.Find(&b).Error
+// Define database methods
+func getAllMethod(b *[]BookModel) error {
+	return common.DB.Find(b).Error
 }
 
-// Create new book in database
-func BookCreate(b *BookModel) error {
+func createMethod(b *BookModel) error {
 	return common.DB.Create(b).Error
 }
 
-// Apply migrations from main.go while init server
+// Define module migrations
 func ApplyMigrations() {
 	common.DB.AutoMigrate(&BookModel{})
 }

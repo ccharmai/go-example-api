@@ -26,6 +26,5 @@ func main() {
 
 	r := gin.Default()
 	addRoutes(r)
-
 	r.Run(":" + string(common.Config.Port))
 }

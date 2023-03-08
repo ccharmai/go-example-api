@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CryptPassword(plaintextPassword string) string {
+func HashPassword(plaintextPassword string) string {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(plaintextPassword), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -21,17 +21,13 @@ func CryptPassword(plaintextPassword string) string {
 	return string(passwordHash)
 }
 
-func ComparePasswords(hashPassword string, candidatePassword string) bool {
+func CompareHashAndPlaintextPassword(hashPassword string, candidatePassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(candidatePassword))
-
-	if err != nil {
-		log.Println(err.Error())
-	}
 
 	return err == nil
 }
 
-func getRSAKeyFromBase64(encodedKey string) *rsa.PrivateKey {
+func getRsaPrivateKey(encodedKey string) *rsa.PrivateKey {
 	decodedKey, err := base64.StdEncoding.DecodeString(encodedKey)
 
 	if err != nil {
@@ -41,22 +37,20 @@ func getRSAKeyFromBase64(encodedKey string) *rsa.PrivateKey {
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodedKey)
 
 	if err != nil {
-		log.Println("RSA read error: ", err.Error())
+		log.Println("Parse RSA Private key error: ", err.Error())
 	}
 
 	return key
 }
 
-func generateJWTTokenWithPayload(ttl time.Duration, payload interface{}, privateKey string) string {
-	decodedPrivateToken := getRSAKeyFromBase64(privateKey)
-
-	now := time.Now().UTC()
+func generateJWT(ttl time.Duration, payload interface{}, privateKey string) string {
+	decodedPrivateKey := getRsaPrivateKey(privateKey)
 
 	claims := make(jwt.MapClaims)
-	claims["exp"] = now.Add(ttl).Unix()
+	claims["exp"] = time.Now().UTC().Add(ttl).Unix()
 	claims["sub"] = payload
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(decodedPrivateToken)
+	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(decodedPrivateKey)
 
 	if err != nil {
 		log.Println("Create JWT error: ", err.Error())
@@ -65,14 +59,23 @@ func generateJWTTokenWithPayload(ttl time.Duration, payload interface{}, private
 	return token
 }
 
-func GenerateAccessToken(payload interface{}) string {
-	ttl, _ := time.ParseDuration("10min")
-	privateKey := common.Config.AccessTokenPrivateKey
-	return generateJWTTokenWithPayload(ttl, payload, privateKey)
+type AccessTokenPayload struct {
+	Email string
 }
 
-func GenerateRefreshToken(payload interface{}) string {
+type RefreshTokenPayload struct {
+	Email  string
+	IpAddr string
+}
+
+func GenerateAccessToken(payload AccessTokenPayload) string {
+	ttl, _ := time.ParseDuration("10min")
+	privateKey := common.Config.AccessTokenPrivateKey
+	return generateJWT(ttl, payload, privateKey)
+}
+
+func GenerateRefreshToken(payload RefreshTokenPayload) string {
 	ttl, _ := time.ParseDuration("2d")
 	privateKey := common.Config.RefreshTokenPrivateKey
-	return generateJWTTokenWithPayload(ttl, payload, privateKey)
+	return generateJWT(ttl, payload, privateKey)
 }

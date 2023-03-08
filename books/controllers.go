@@ -9,7 +9,7 @@ import (
 func getAllBooksController(c *gin.Context) {
 	var books []BookModel
 
-	if err := GetAllBooks(&books); err != nil {
+	if err := getAllMethod(&books); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -18,7 +18,7 @@ func getAllBooksController(c *gin.Context) {
 }
 
 func postNewBookController(c *gin.Context) {
-	var bookRequest CreateBookModel
+	var bookRequest PostBookModel
 
 	if err := c.ShouldBindJSON(&bookRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -27,7 +27,7 @@ func postNewBookController(c *gin.Context) {
 
 	var book = bookRequest.getBookModel()
 
-	if err := BookCreate(book); err != nil {
+	if err := createMethod(book); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

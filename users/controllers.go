@@ -14,9 +14,9 @@ func postNewUserController(c *gin.Context) {
 		return
 	}
 
-	var user = userRequest.getUserModelForUserCreate()
+	var user = userRequest.getUserModelWithPasswordHash()
 
-	if err := UserCreate(user); err != nil {
+	if err := createMethod(user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -36,17 +36,16 @@ func userLoginController(c *gin.Context) {
 
 	errorAuthUserMessage := "Email or password are invalid"
 
-	if err := GetUserWithEmail(&user, userRequest.Email); err != nil {
+	if err := findUserByEmailMethod(&user, userRequest.Email); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": errorAuthUserMessage})
 		return
 	}
 
-	if status := user.CheckUserPassword(userRequest.Password); !status {
+	if success := user.checkPassword(userRequest.Password); !success {
 		c.JSON(http.StatusBadRequest, gin.H{"error": errorAuthUserMessage})
 		return
 	}
 
-	accessToken, refreshToken := user.CreateTokens(c.ClientIP())
-
-	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken, "refreshToken": refreshToken})
+	accessToken, refreshToken := user.createJWTTokens(c.ClientIP())
+	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken, "refreshToken": refreshToken, "ip": c.ClientIP()})
 }
