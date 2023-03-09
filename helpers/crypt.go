@@ -77,7 +77,7 @@ func generateJWT(ttl time.Duration, payload interface{}, privateKey string) stri
 	return token
 }
 
-func parseJWT(token string, publicKey string) (map[string]interface{}, error) {
+func parseJWT(token string, publicKey string) (*map[string]interface{}, error) {
 	rsaPublic := getRsaPublicKey(publicKey)
 
 	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
@@ -99,7 +99,7 @@ func parseJWT(token string, publicKey string) (map[string]interface{}, error) {
 
 	payload := claims["sub"].(map[string]interface{})
 
-	return payload, nil
+	return &payload, nil
 }
 
 type AccessTokenPayload struct {
@@ -111,22 +111,22 @@ type RefreshTokenPayload struct {
 	IpAddr string
 }
 
-func GenerateAccessToken(payload AccessTokenPayload) string {
+func GenerateAccessToken(payload *AccessTokenPayload) string {
 	ttl, _ := time.ParseDuration("10m")
 
 	privateKey := common.Config.AccessTokenPrivateKey
 	return generateJWT(ttl, payload, privateKey)
 }
 
-func GenerateRefreshToken(payload RefreshTokenPayload) string {
+func GenerateRefreshToken(payload *RefreshTokenPayload) string {
 	ttl, _ := time.ParseDuration("24h")
 
 	privateKey := common.Config.RefreshTokenPrivateKey
 	return generateJWT(ttl, payload, privateKey)
 }
 
-func getIdFromClaims(payload map[string]interface{}) (uint, bool) {
-	parsedId, status := payload["ID"].(float64)
+func getIdFromClaims(payload *map[string]interface{}) (uint, bool) {
+	parsedId, status := (*payload)["ID"].(float64)
 
 	if !status {
 		return 0, false
@@ -135,8 +135,8 @@ func getIdFromClaims(payload map[string]interface{}) (uint, bool) {
 	return uint(parsedId), true
 }
 
-func ParseAccessToken(token string) (AccessTokenPayload, bool) {
-	payload := AccessTokenPayload{}
+func ParseAccessToken(token string) (*AccessTokenPayload, bool) {
+	payload := &AccessTokenPayload{}
 
 	publicKey := common.Config.AccessTokenPublicKey
 	mapClaims, err := parseJWT(token, publicKey)
@@ -156,8 +156,8 @@ func ParseAccessToken(token string) (AccessTokenPayload, bool) {
 	return payload, true
 }
 
-func ParseRefreshToken(token string) (RefreshTokenPayload, bool) {
-	payload := RefreshTokenPayload{}
+func ParseRefreshToken(token string) (*RefreshTokenPayload, bool) {
+	payload := &RefreshTokenPayload{}
 
 	publicKey := common.Config.RefreshTokenPublicKey
 	mapClaims, err := parseJWT(token, publicKey)
@@ -172,7 +172,7 @@ func ParseRefreshToken(token string) (RefreshTokenPayload, bool) {
 		return payload, false
 	}
 
-	ipAddr, status := mapClaims["IpAddr"].(string)
+	ipAddr, status := (*mapClaims)["IpAddr"].(string)
 
 	if !status {
 		return payload, false

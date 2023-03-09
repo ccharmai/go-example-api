@@ -42,8 +42,8 @@ func (u *UserModel) createJWTTokens(ipAddr string) (string, string) {
 		IpAddr: ipAddr,
 	}
 
-	accessToken := helpers.GenerateAccessToken(accessPayload)
-	refreshToken := helpers.GenerateRefreshToken(refreshPayload)
+	accessToken := helpers.GenerateAccessToken(&accessPayload)
+	refreshToken := helpers.GenerateRefreshToken(&refreshPayload)
 
 	return accessToken, refreshToken
 }
