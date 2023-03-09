@@ -47,5 +47,9 @@ func userLoginController(c *gin.Context) {
 	}
 
 	accessToken, refreshToken := user.createJWTTokens(c.ClientIP())
-	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken, "refreshToken": refreshToken, "ip": c.ClientIP()})
+	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken, "refreshToken": refreshToken})
+}
+
+func meController(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }

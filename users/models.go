@@ -34,10 +34,11 @@ func (u *UserModel) checkPassword(password string) bool {
 
 func (u *UserModel) createJWTTokens(ipAddr string) (string, string) {
 	accessPayload := helpers.AccessTokenPayload{
-		Email: u.Email,
+		ID: u.ID,
 	}
+
 	refreshPayload := helpers.RefreshTokenPayload{
-		Email:  u.Email,
+		ID:     u.ID,
 		IpAddr: ipAddr,
 	}
 
